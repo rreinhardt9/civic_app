@@ -1,0 +1,61 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/google-apis/google-client-loader.html">
+
+<dom-module id="reps-list">
+  <template>
+    <google-client-loader id="civicinfo"
+      name="civicinfo"
+      version="v2"></google-client-loader>
+
+    <h3>Reps list here</h3>
+    <ul>
+      <template is="dom-repeat" items="{{officials}}">
+        <li><span>{{item.name}}</span></li>
+      </template>
+    </ul>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'reps-list',
+      properties: {
+        divisions: {
+          type: Object
+        },
+        offices: {
+          type: Array
+        },
+        officials: {
+          type: Array
+        },
+        apiKey: {
+          type: String
+        }
+      },
+      listeners: {
+        'civicinfo.google-api-load': 'apiLoad',
+        'civicinfo.google-api-load-error': 'handleApiError'
+      },
+      ready: function() {
+        console.log("ready");
+      },
+      apiLoad: function() {
+        gapi.client.setApiKey(this.apiKey);
+        var request = this.$.civicinfo.api.representatives.representativeInfoByAddress({
+          address: '46038'
+        });
+        request.then(function(resp) {
+          this.officials = resp.result.officials
+          this.offices = resp.result.offices
+          this.divisions = resp.result.divisions
+        }, function(reason) {
+          console.log(reason);
+        }, this);
+      },
+      handleApiError: function(err) {
+        console.log("Error: " + err);
+      }
+    });
+  </script>
+</dom-module>
